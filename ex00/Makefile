@@ -4,7 +4,7 @@ CXXFLAGS	=	-Wall -Wextra -Werror
 CXXFLAGS	+=	-pedantic
 LDFLAGS		=	-fsanitize=address -g3
 
-CXX			+=	$(CXXFLAGS) $(LDFLAGS)
+#CXX			+=	$(CXXFLAGS) $(LDFLAGS)
 
 # Utilities
 RM			=	rm -f
@@ -15,13 +15,14 @@ NAME		=	btc
 # Sources
 SRCS		=	main.cpp
 OBJS		=	$(SRCS:.cpp=.o)
+CXXPLUS		=	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(SRCS)
 
 # Targets
 
 all:		$(NAME)
 
 $(NAME):	$(OBJS)
-			$(CXX) $(SRCS) -o $(NAME)
+			$(CXXPLUS) -o $(NAME)
 
 re:			fclean all
 
@@ -33,11 +34,13 @@ fclean:		clean
 
 run0:		re
 			./btc input.csv
+			make cleandbg
 
 run1:		re
 			./btc data.csv
+			make cleandbg
 
-clean_dbg:
+cleandbg:
 			$(RM) -r $(NAME).dSYM
 
 .PHONY:		all re clean fclean
