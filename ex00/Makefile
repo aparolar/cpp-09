@@ -13,7 +13,7 @@ RM			=	rm -f
 NAME		=	btc
 
 # Sources
-SRCS		=	main.cpp
+SRCS		=	main.cpp BitcoinExchange.cpp
 OBJS		=	$(SRCS:.cpp=.o)
 CXXPLUS		=	$(CXX) $(CXXFLAGS) $(LDFLAGS) $(SRCS)
 
@@ -32,15 +32,13 @@ clean:
 fclean:		clean
 			$(RM) $(NAME)
 
-run0:		re
+run0:		re cleandbg
 			./btc input.csv
-			make cleandbg
 
-run1:		re
+run1:		re cleandbg
 			./btc data.csv
-			make cleandbg
 
 cleandbg:
-			$(RM) -r $(NAME).dSYM
+			@$(RM) -r $(NAME).dSYM
 
 .PHONY:		all re clean fclean

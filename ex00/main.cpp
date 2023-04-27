@@ -6,10 +6,11 @@
 /*   By: aparolar <aparolar@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 15:25:21 by aparolar          #+#    #+#             */
-/*   Updated: 2023/04/22 15:59:48 by aparolar         ###   ########.fr       */
+/*   Updated: 2023/04/27 15:47:56 by aparolar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include "BitcoinExchange.hpp"
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -17,7 +18,27 @@
 
 int main(int argc, char	**argv)
 {
-	(void)argc;
+	if (argc != 2)
+	{
+		std::cout << "Error: could not open file." << std::endl;
+		return (1);
+	}
+
+	BitcoinExchange btc;
+	try
+	{
+		btc.readDB("data.csv");	
+		btc.check(std::string(argv[1]));
+	}
+	catch(const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+		return (1);
+	}
+	return (0);
+}
+
+/*
 	std::string fname = std::string(argv[1]);
 	//std::cout << "Enter the file name: ";
 	//std::cin >> fname;
@@ -48,4 +69,4 @@ int main(int argc, char	**argv)
 	for (viter vit = content.begin(); vit != content.end(); vit++)
 		std::cout << " -> " << vit.base()->begin().base()->begin().base() << " <> " << std::endl;
 }
-
+*/
