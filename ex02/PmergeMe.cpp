@@ -6,19 +6,20 @@
 /*   By: aparolar <aparolar@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/28 10:06:40 by aparolar          #+#    #+#             */
-/*   Updated: 2023/05/05 15:45:50 by aparolar         ###   ########.fr       */
+/*   Updated: 2023/05/06 16:00:34 by aparolar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "PmergeMe.hpp"
-#include <limits>
-#include <type_traits>
+#include <iomanip>
 #include <iostream>
+#include <ctime>
+
 
 PmergeMe::PmergeMe() {}
 PmergeMe::PmergeMe(PmergeMe const &cpy)
 	:	_vector(cpy._vector),
-		_list(cpy._list)
+		_deque(cpy._deque)
 {
 }
 
@@ -31,13 +32,13 @@ PmergeMe::PmergeMe(int count, char **values)
 		std::string value = std::string(values[i]);
 		if (isValidInteger(value))
 		{
-			_list.push_back(std::stoi(value));
 			_vector.push_back(std::stoi(value));
+			_deque.push_back(std::stoi(value));
 		}
 		else
 		{
 			std::cout << "Error" << std::endl;
-			throw std::runtime_error("number error");
+			exit(1);
 		}
 	}
 }
@@ -47,29 +48,52 @@ PmergeMe::~PmergeMe() {}
 PmergeMe const &PmergeMe::operator=(PmergeMe const &cpy)
 {
 	this->_vector = cpy._vector;
-	this->_list = cpy._list;
+	this->_deque = cpy._deque;
 	return *this;
 }
 
 void	PmergeMe::runVectorSort()
 {
-	vector_type	ret;
-	//vector_size	n = _vector.size();
-	//int			k = n / 2;
+	clock_t start = clock();
+	_vector_sort(_vector);
+	clock_t end = clock();
 
-	ret = _vector_sort(_vector);
-	
+	std::cout << "Time to process a range of " << this->_vector.size();
+    std::cout << " elements with std::vector<unsigend int> : ";
+    std::cout << std::fixed << std::setprecision(5) << (static_cast<double>(end - start) / CLOCKS_PER_SEC);
+    std::cout << " us" << std::endl;
 
-	std::cout << std::endl;
-	std::cout << "Resultado:" << std::endl;
-	std::cout << std::endl;
-	for (vector_iter it = ret.begin(); it != ret.end(); it++)
-		std::cout << *it << " ";
+	if (_debug_mode)
+	{
+		std::cout << std::endl;
+		std::cout << "Resultado vector:" << std::endl;
+		std::cout << std::endl;
+		std::cout << "Total returned = " << _vector_result.size() << std::endl;
+		for (vector_iter it = _vector_result.begin(); it != _vector_result.end(); it++)
+			std::cout << *it << " ";
+	}
 }
 
-void	PmergeMe::runListSort()
+void	PmergeMe::runDequeSort()
 {
-	
+	clock_t start = clock();
+	_deque_sort(_deque);
+	clock_t end = clock();
+
+	std::cout << "Time to process a range of " << this->_deque.size();
+    std::cout << " elements with std::deque<unsigend int> : ";
+    std::cout << std::fixed << std::setprecision(5) << (static_cast<double>(end - start) / CLOCKS_PER_SEC);
+    std::cout << " us" << std::endl;
+
+	if (_debug_mode)
+	{
+		std::cout << std::endl;
+		std::cout << "Resultado deque:" << std::endl;
+		std::cout << std::endl;
+		std::cout << "Total returned = " << _deque_result.size() << std::endl;
+		for (deque_iter it = _deque_result.begin(); it != _deque_result.end(); it++)
+			std::cout << *it << " ";
+	}
 }
 
 bool	PmergeMe::isValidInteger(std::string const &value)
@@ -82,205 +106,94 @@ bool	PmergeMe::isValidInteger(std::string const &value)
 	return (true);
 }
 
-PmergeMe::vector_type	PmergeMe::_vector_sort(vector_type &toSplit)
+void	PmergeMe::_vector_sort(vector_type &toSplit)
 {
-	vector_type	ret;
+	vector_iter	middle;
 	vector_type left;
 	vector_type rigth;
-	vector_iter	middle;
 
-	//std::cout << "n = " << n << " k = " << k << " k / 2 = " << k / 2 << " i = " << i << std::endl;
-	std::cout << "toSplit: " << toSplit.size() << std::endl;
-	middle = toSplit.begin() + toSplit.size() / 2;
-	if (toSplit.size() > 2)
+	if (toSplit.size() > 1)
 	{
-		for (vector_iter it = toSplit.begin(); it != middle; it++)
-			left.push_back(*it);
-		for (vector_iter it = middle; it != toSplit.end(); it++)
-			rigth.push_back(*it);
-		left = _vector_sort(left);
-		rigth = _vector_sort(rigth);
+		middle = toSplit.begin() + toSplit.size() / 2;
+		left.assign(toSplit.begin(), middle);
+		rigth.assign(middle, toSplit.end());
+		_vector_sort(left);
+		_vector_sort(rigth);
 	}
-	else if (toSplit.size() <= 2)
+	else if (_vector_result.size() > 0)
 	{
-		for (vector_iter it = toSplit.begin(); it != middle; it++)
-			left.push_back(*it);
-		for (vector_iter it = middle; it != toSplit.end(); it++)
-			rigth.push_back(*it);
-	}
-	ret = _vector_merge(left, rigth);
-	std::cout << "retourning ret size: " << ret.size() << std::endl;
-	for (vector_iter it = ret.begin(); it != ret.end(); it++)
-		std::cout << *it << " - ";
-	std::cout << std::endl << std::endl;
-	return ret;
-
-		
-	// idea, el subject te dice que solo puedes usar dos contenedores, "pero no te dice cuantas veces cada uno"
-	// despues de dividir merge lo que hace es reordenar en un solo vector los cumulados de los dos vectores resultantes
-}
-
-PmergeMe::vector_type PmergeMe::_vector_merge(vector_type &left, vector_type &rigth)
-{
-	vector_type	ret;
-
-	_vector_insert(left, ret);
-	_vector_insert(rigth, ret);
-
-	std::cout << "post merge size: " << ret.size() << std::endl;
-	return ret;
-}
-
-void	PmergeMe::_vector_insert(vector_type &src, vector_type &dst)
-{
-		if  (!dst.size() && src.size())
+		for (vector_iter sit = toSplit.begin(); sit != toSplit.end(); sit++)
 		{
-			dst.insert(dst.begin(), *src.begin());
-			src.erase(src.begin());
-			if (src.size() == 1)
+			for (vector_iter rit = _vector_result.begin(); rit != _vector_result.end(); rit++)
 			{
-				if (*dst.begin() < *src.begin())
-					dst.push_back(*src.begin());
-				else
-					dst.insert(dst.begin(), *src.begin());
-				src.clear();
-			}
-		}
-
-		vector_iter it = src.begin();
-
-		while (src.size() > 0)
-		{
-			std::cout << "it = " << *it << std::endl;
-			std::cout << "src.size = " << src.size() << std::endl;
-			std::cout << "ret.size = " << dst.size() << std::endl;
-			//vector_iter rit = dst.begin();
-
-			if ((dst.size() > 0 || dst.size() == 0) && src.size() == 1)
-			{
-				if (src.begin() != src.end())
-					dst.push_back(*src.begin());
-				break;
-			}
-			else
-			{
-				for (vector_iter dit = dst.begin(); it != dst.end(); it++)
+				if (*rit > *sit)
 				{
-					if (*it > *dit)
+					_vector_result.insert(rit, *sit);
+					break;
+				}
+				else
+				{
+					for (vector_iter rrit = _vector_result.end() - 1; rrit >= _vector_result.begin(); rrit--)
 					{
-						dst.insert(dit, *it);
-						src.erase(it);
-						break;
+						if (*rrit < *sit)
+						{
+							_vector_result.insert(rrit + 1, *sit);
+							break;
+						}
 					}
-				}
-			}
-			//vector_iter lrit = dst.begin();
-			/*
-			if (src.size() < 2)
-			{
-				std::cout << "stage 2" << std::endl;
-				dst.push_back(*it);
-				src.erase(it);
-				break;
-			}
-			if (dst.size() == 0)
-			{
-				dst.push_back(*it);
-				src.erase(it);
-				std::cout << "dst.begin() = " << *dst.begin() << std::endl;
-			}
-			for (rit = dst.begin(); rit != dst.end(); rit++)
-			{
-				std::cout << *rit << " - " << *it << std::endl;
-				int	value = *it;
-				if (*rit > value)
-				{
-					std::cout << "stage 1" << std::endl;
-					dst.insert(rit, value);
-					if (*it)
-						src.erase(it);
-					break;
-				}
-				else
-				{
-					dst.push_back(value);
-					src.erase(it);
-					break;
-				}
-
-			}*/
-			/*else
-			{
-				dst.push_back(*it);
-				break;
-			}*/
-
-			++it;
-			if (src.size() == 0)
-				break;
-/*
-			while (rit != dst.end())
-			{
-				if (*it > *rit)
-				{
-					lrit = rit;
-				}
-				else
-					break;
-				++rit;
-			}
-			if (lrit != dst.end())
-			{
-				std::cout << "lrit = " << *lrit <<" it = " << *it << std::endl;
-				if (*lrit > *it)
-				{
-					std::cout << "insert" << std::endl;
-					dst.insert(lrit, *it);
-					src.erase(it);
-				}
-				else
-				{
-					std::cout << "push_back" << std::endl;
-					dst.push_back(*it);
-					src.erase(it);
-				}
-			}*/
-			/*else
-			{
-				dst.insert(dst.end(), *it);
-				src.erase(it);
-			}*/
-			/*
-			for (vector_iter rit = dst.begin(); rit != dst.end(); rit++)
-			{
-				std::cout << "it = " << *it << " rit = " << *rit << std::endl;
-				if (*it < *rit)
-				{
-					std::cout << "stage 1" << std::endl;
-					dst.insert(rit, *it);
-					src.erase(it);
-					break;
-				}
-				else if (*it > *rit)
-				{
-					std::cout << "stage 3" << std::endl;
-					dst.insert(rit + 1, *it);
-					src.erase(it);
 					break;
 				}
 			}
-			*/
 		}
-		//std::cout << "vector_inset result : "
+	}
+	else if (_vector_result.size() == 0 && toSplit.size() == 1)
+	{
+		_vector_result.push_back(*toSplit.begin());
+	}
 }
 
-void	PmergeMe::_get_vector_max_iter(vector_type &src, vector_iter &iter)
+void	PmergeMe::_deque_sort(deque_type &toSplit)
 {
-	int	max = 0;
-	for (vector_iter it = src.begin(); it != src.end(); it++)
-		if (max < *it)
-			iter = it;
+	deque_iter	middle;
+	deque_type left;
+	deque_type rigth;
+
+	if (toSplit.size() > 1)
+	{
+		middle = toSplit.begin() + toSplit.size() / 2;
+		left.assign(toSplit.begin(), middle);
+		rigth.assign(middle, toSplit.end());
+		_deque_sort(left);
+		_deque_sort(rigth);
+	}
+	else if (_deque_result.size() > 0)
+	{
+		for (deque_iter sit = toSplit.begin(); sit != toSplit.end(); sit++)
+		{
+			for (deque_iter rit = _deque_result.begin(); rit != _deque_result.end(); rit++)
+			{
+				if (*rit > *sit)
+				{
+					_deque_result.insert(rit, *sit);
+					break;
+				}
+				else
+				{
+					for (deque_iter rrit = _deque_result.end() - 1; rrit >= _deque_result.begin(); rrit--)
+					{
+						if (*rrit < *sit)
+						{
+							_deque_result.insert(rrit + 1, *sit);
+							break;
+						}
+					}
+					break;
+				}
+			}
+		}
+	}
+	else if (_deque_result.size() == 0 && toSplit.size() == 1)
+	{
+		_deque_result.push_back(*toSplit.begin());
+	}
 }
-
-
-

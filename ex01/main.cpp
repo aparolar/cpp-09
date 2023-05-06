@@ -6,7 +6,7 @@
 /*   By: aparolar <aparolar@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/03/30 15:25:21 by aparolar          #+#    #+#             */
-/*   Updated: 2023/04/27 23:59:22 by aparolar         ###   ########.fr       */
+/*   Updated: 2023/04/28 10:17:31 by aparolar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,12 @@ int main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 
-	//std::cout << "building" << std::endl;
+	if (argc != 2)
+	{
+		std::cout << "Error" << std::endl;
+		return 1;
+	}
+
 	RPN	rpn = RPN(std::string(argv[1]));
-	//std::cout << "checking" << std::endl;
-	rpn.calculate();
+	return 0;
 }

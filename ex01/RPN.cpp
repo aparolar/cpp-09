@@ -6,7 +6,7 @@
 /*   By: aparolar <aparolar@student.42madrid.com>   +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/04/27 18:25:59 by aparolar          #+#    #+#             */
-/*   Updated: 2023/04/28 00:16:29 by aparolar         ###   ########.fr       */
+/*   Updated: 2023/04/28 10:19:21 by aparolar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,10 +34,6 @@ RPN const	&RPN::operator=(RPN const &cpy) const
 	return *this;
 }
 
-void	RPN::calculate()
-{
-}
-
 void	RPN::loadOperations(std::string const &operations)
 {
 	std::stringstream	ss(operations);
@@ -55,7 +51,7 @@ void	RPN::loadOperations(std::string const &operations)
 			_stack.pop();
 			_stack.push(doOperation(a, b, opr));
 		}
-		else if (isOperand(opr) && _stack.size() <= 1)
+		else if ((isOperand(opr) && _stack.size() <= 1) || !isNumber(opr))
 		{
 			std::cout << "Error" << std::endl;
 			return;
@@ -63,19 +59,31 @@ void	RPN::loadOperations(std::string const &operations)
 		else
 			_stack.push(std::stol(opr));
 	}
-	std::cout << _stack.top() << std::endl;
+	if (_stack.size() == 1)
+		std::cout << _stack.top() << std::endl;
+	else
+		std::cout << "Error" << std::endl;
 }
 
 bool	RPN::isOperand(std::string const &opr)
 {
-	if (std::isdigit(opr[0]))
-		return false;
+	if (opr == "+" || opr == "-" || opr == "*" || opr == "/")
+		return true;
+	return false;	
+}
+
+bool	RPN::isNumber(std::string const &number)
+{
+	for (std::string::const_iterator it = number.begin(); it != number.end(); it++)
+	{
+		if (!std::isdigit(*it))
+			return false;
+	}
 	return true;
 }
 
 int		RPN::doOperation(long a, long b, std::string const &operand) const
 {
-	//std::cout << "doOperation " << a << " " << operand << " " << b << std::endl;
 	if (operand == "+")
 	{
 		return a + b;
@@ -88,7 +96,7 @@ int		RPN::doOperation(long a, long b, std::string const &operand) const
 	{
 		return a * b;
 	}
-	else //(operand == "/")
+	else
 	{
 		return a / b;
 	}

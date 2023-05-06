@@ -2,7 +2,7 @@
 CXX			=	c++
 CXXFLAGS	=	-Wall -Wextra -Werror
 CXXFLAGS	+=	-pedantic
-LDFLAGS		=	-fsanitize=address -g3
+#LDFLAGS		=	-fsanitize=address -g3
 
 #CXX			+=	$(CXXFLAGS) $(LDFLAGS)
 
